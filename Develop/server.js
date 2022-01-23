@@ -49,3 +49,28 @@ app.post('/api/notes', (req, res) => {
         res.json(note)
     }
 })
+
+app.delete ('/api/notes/:id', (req,res) => {
+    const id = req.params.id
+    let note
+
+    notes.map((element, index) => {
+        if (element.id == id) {
+            note = element
+            notes.splics(index, 1)
+            return res.json(note)
+        }
+    })
+})
+
+app.get ('/', (req,res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'))
+})
+
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'))
+})
+
+app.listen(PORT, () => {
+    console.log(`API server now on port ${PORT}`)
+})
