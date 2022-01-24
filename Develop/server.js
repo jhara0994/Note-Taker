@@ -1,6 +1,8 @@
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
+const uuid = require('uuid')
+const { notes } = require('./db/db.json')
 
 const PORT = process.env.PORT || 3001
 
@@ -8,58 +10,26 @@ const app = express()
 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
-app.use(express.static('public'))
-
-const {notes} = require('./db/db.json')
-
-function createNote (body, notesArray) {
-    const note = body
-    notesArray.push(note)
-
-    fs.writeFileSync(
-        path.join(__dirnam, './db/db.json'),
-        JSON.stringify({notes : notesArray}, null, 2)
-    );
-    return note
-}
-
-function validateNote (note) {
-    if (!note.title || typeof note.title !== 'string') {
-        return false;
-    }
-    if (!note.text || typeof note.text !== 'string') {
-        return false
-    }
-    return true
-}
+app.use(express.static('./public'))
 
 app.get('/api/notes', (req, res) => {
-    res.json(notes)
+    res.sendFile(path.join(__dirname, "./db/db.json"))
 })
 
 app.post('/api/notes', (req, res) => {
-    req.body.id = notes.length.toString();
-
-    if (!validateNote(req.body)) {
-        res.status(400).send('Please format the note correctly!')
-    } else {
-        const note = createNote(req.body, notes)
-
-        res.json(note)
-    }
+    const notes = JSON.parse(fs.readFileSync('./db/db.json'))
+    const newNotes = req.body
+    newNotes.id = uuid.v4()
+    notes.push(newNotes)
+    fs.writeFileSync('./db/db.json'), JSON.stringify,
+    res.json(notes)
 })
 
 app.delete ('/api/notes/:id', (req,res) => {
-    const id = req.params.id
-    let note
-
-    notes.map((element, index) => {
-        if (element.id == id) {
-            note = element
-            notes.splics(index, 1)
-            return res.json(note)
-        }
-    })
+    const notes = JSON.parse(fs.readFileSync('./db/db.json'))
+    const delNote = notes.filter((rmvNotes) => rmvNote.id !== req.params.id)
+    fs.writeFileSync('./db/db.json', JSON.stringify(delNote))
+    res.json(delNote)
 })
 
 app.get ('/', (req,res) => {
