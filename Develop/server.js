@@ -19,6 +19,10 @@ app.get('/notes', (req, res) => {
 
 app.get('/api/notes', (req, res) => res.json(notes))
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '/public/index.html'))
+})
+
 app.post('/api/notes', (req, res) => {
     console.info(`${req.method} New note added`)
 
@@ -56,10 +60,26 @@ app.post('/api/notes', (req, res) => {
 })
 
 app.delete ('/api/notes/:id', (req,res) => {
-    const notes = JSON.parse(fs.readFileSync('./db/db.json'))
-    const delNote = notes.filter((rmvNotes) => rmvNote.id !== req.params.id)
-    fs.writeFileSync('./db/db.json', JSON.stringify(delNote))
-    res.json(delNote)
+    let jsonFilePath = path.join(__dirname, './db/db.json')
+
+    readFromFile('./db/db.json').then((data) => {
+        const delNote = JSON.parse(data)
+        for (let i=0; i < delNote.length; i++) {
+            if (delNote[i].id == req.params.id) {
+                notes.splice(i, 1)
+                break
+            }
+
+        fs.writeFile(jsonFilePath, JSON.stringify(notes, null, 2),function (err) {
+            if (err) {
+                return console.log(err)
+            } else {
+                console.log('The note has been deleted')
+            }
+        })
+        res.json(notes)
+        }
+    })
 })
 
 app.get ('/', (req,res) => {
