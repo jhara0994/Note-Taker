@@ -1,7 +1,8 @@
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
-const uuid = require('uuid')
+const uuid = require('./helpers/uuid')
+const { readFromFile, writeToFile } = require('./helpers/fsUtils')
 const { notes } = require('./db/db.json')
 
 const PORT = process.env.PORT || 3001
@@ -12,17 +13,46 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 app.use(express.static('public'))
 
-app.get('/api/notes', (req, res) => {
+app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, "./public/notes.html"))
 })
 
+app.get('/api/notes', (req, res) => res.json(notes))
+
 app.post('/api/notes', (req, res) => {
-    const notes = JSON.parse(fs.readFileSync('./db/db.json'))
-    const newNotes = req.body
-    newNotes.id = uuid.v4()
-    notes.push(newNotes)
-    fs.writeFileSync('./db/db.json'), JSON.stringify,
-    res.json(notes)
+    console.info(`${req.method} New note added`)
+
+    const { title, text } = req.body
+
+    if (title && text) {
+        const newNote = {
+            title, 
+            text,
+            uuid()
+        }
+        notes.push(newNote)
+
+        fs.readFile('./db/db.json', 'utf8', (err, data) => {
+            if (err) {
+                console.log(err)
+            } else {
+                const note = JSON.parse(data)
+                note.push(newNote)
+                fs.writeFileSync('./db/db.json', JSON.stringify(note, null, 2),
+                (writeErr) => writeErr ? console.error(writeErr) : console.info ('Note was successfully added'))
+            }
+        })
+    }
+
+    const response = {
+        status: 'success',
+        body: newNote,
+    }
+    if (response === 200){
+    res.status(200).json(response)
+    } else {
+        res.status(500).json('Error in posting note')
+    }
 })
 
 app.delete ('/api/notes/:id', (req,res) => {
