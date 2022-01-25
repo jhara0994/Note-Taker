@@ -10,10 +10,10 @@ const app = express()
 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
-app.use(express.static('./public'))
+app.use(express.static('public'))
 
 app.get('/api/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, "./db/db.json"))
+    res.sendFile(path.join(__dirname, "./public/notes.html"))
 })
 
 app.post('/api/notes', (req, res) => {
