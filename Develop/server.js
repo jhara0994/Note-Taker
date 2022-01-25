@@ -2,7 +2,7 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const uuid = require('./helpers/uuid')
-const { readFromFile, writeToFile } = require('./helpers/fsUtils')
+const { readFromFile, writeToFile, readAndAppend } = require('./helpers/fsUtils')
 const { notes } = require('./db/db.json')
 
 const PORT = process.env.PORT || 3001
@@ -14,10 +14,11 @@ app.use(express.json())
 app.use(express.static('public'))
 
 app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/notes.html"))
+    res.sendFile(path.join(__dirname, "/public/notes.html"))
 })
 
 app.get('/api/notes', (req, res) => res.json(notes))
+app.get('/api/notes/:note_id', (req, res) => res.json(notes))
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
@@ -32,7 +33,7 @@ app.post('/api/notes', (req, res) => {
         const newNote = {
             title, 
             text,
-            uuid()
+            id: uuid()
         }
         notes.push(newNote)
 
@@ -80,14 +81,6 @@ app.delete ('/api/notes/:id', (req,res) => {
         res.json(notes)
         }
     })
-})
-
-app.get ('/', (req,res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'))
-})
-
-app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'))
 })
 
 app.listen(PORT, () => {
