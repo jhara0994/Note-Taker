@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const uuid = require('./helpers/uuid')
 const { readFromFile, writeToFile, readAndAppend } = require('./helpers/fsUtils')
-const { json } = require('express/lib/response')
 const { noteInput } = require('./db/db.json')
 
 const PORT = process.env.PORT || 3001
@@ -19,7 +18,6 @@ app.get('/notes', (req, res) => {
 })
 
 app.get('/api/notes', (req, res) => res.json(noteInput))
-app.get('/api/notes/:note_id', (req, res) => res.json(noteInput))
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
@@ -55,6 +53,8 @@ app.post('/api/notes', (req, res) => {
         console.log(response)
         
         res.status(201).json(response)
+    } else {
+        res.status(500).json('Error in posting note')
     }
 })
 
@@ -82,5 +82,5 @@ app.delete ('/api/notes/:id', (req,res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`API server now on port ${PORT}`)
+    console.log(`API server now on port http://localhost:${PORT}`)
 })
